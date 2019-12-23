@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 from metabase_client.http import HttpClient
 from metabase_client.resources import CardResource, SessionResource
 from metabase_client.exceptions import (
@@ -8,7 +10,7 @@ from metabase_client.exceptions import (
 
 
 class MetabaseClient:
-    def __init__(self, endpoint, **kwargs):
+    def __init__(self, endpoint: str, **kwargs):
         """Creates a Metabase Client instance.
 
         :param endpoint: URL string of Metabase server.
@@ -16,6 +18,8 @@ class MetabaseClient:
         :param password: (optional) Password string.
         :param token: (optional) Auth token already obtained by Metabase server
         :return: :class:`MetabaseClient <MetabaseClient>` object
+        :raises:
+            MetabaseConfigError: No credentials provided.
 
         Usage::
             >>> from metabase_client import MetabaseClient
@@ -46,7 +50,13 @@ class MetabaseClient:
         ):
             raise MetabaseConfigError("Invalid arguments provided.")
 
-    def auth(self):
+    def auth(self) -> None:
+        """Authenticate in metabase API using password and username provided.
+
+        :raises:
+            MetabaseConfigError: No username and password provided.
+            MetabaseAuthError: Request error, invalid credentials or no token returned.
+        """
         if not all([self.username, self.password]):
             raise MetabaseConfigError("You must provide username and password.")
 
@@ -60,7 +70,8 @@ class MetabaseClient:
         except Exception as exc:
             raise MetabaseAuthError(repr(exc))
 
-    def get_cards(self):
+    def get_cards(self) -> List[Dict]:
+        """Get a list of cards available by metabase API."""
         try:
             return self.card_resource.list(self.token)
         except Exception as exc:
